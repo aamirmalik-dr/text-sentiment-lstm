@@ -18,7 +18,7 @@ clf = SentimentClassifier.load("models/sentlstm_rt.pt")
 
 pred = clf.predict_one("a heartfelt and beautifully acted film")
 print(pred.label, round(pred.confidence, 2))
-# positive 0.97
+# positive 0.76
 
 for p in clf.predict(["dull and far too long", "sharp, funny, and moving"]):
     print(p.label, round(p.confidence, 2))
