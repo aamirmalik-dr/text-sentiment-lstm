@@ -1,9 +1,12 @@
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from sentlstm.data import build_dataset, collate_batch, synthetic_sentiment
+from sentlstm.calibration import reliability_curve
+from sentlstm.data import build_dataset, collate_batch, load_csv, synthetic_sentiment
 from sentlstm.embeddings import build_embedding_matrix
 from sentlstm.models import LSTMClassifier
+from sentlstm.predict import Prediction, SentimentClassifier
 from sentlstm.tokenizer import Vocabulary, tokenize
 from sentlstm.train import Trainer, accuracy, set_seed
 
@@ -47,6 +50,72 @@ def test_pretrained_embeddings_wire_in():
     ids = torch.randint(0, len(vocab), (2, 5))
     lengths = torch.tensor([5, 2])
     assert model(ids, lengths).shape == (2, 2)
+
+
+def test_vocab_from_stoi_roundtrip():
+    vocab = Vocabulary().build(["good good great bad bad"], min_freq=1)
+    rebuilt = Vocabulary.from_stoi(vocab.stoi)
+    assert rebuilt.stoi == vocab.stoi
+    assert rebuilt.itos[rebuilt.stoi["good"]] == "good"
+    assert rebuilt.pad_id == 0 and rebuilt.unk_id == 1
+
+
+def _toy_classifier():
+    train_texts, train_labels = synthetic_sentiment(repeats=20)
+    vocab = Vocabulary().build(train_texts, min_freq=1)
+    model = LSTMClassifier(len(vocab), embed_dim=16, hidden_dim=16)
+    return SentimentClassifier(model, vocab, labels=("negative", "positive"))
+
+
+def test_predict_returns_typed_records():
+    clf = _toy_classifier()
+    preds = clf.predict(["a great and wonderful film", "an awful boring movie"])
+    assert len(preds) == 2
+    assert all(isinstance(p, Prediction) for p in preds)
+    p = preds[0]
+    assert p.label in ("negative", "positive")
+    assert 0.0 <= p.confidence <= 1.0
+    assert abs(sum(p.probabilities) - 1.0) < 1e-5
+
+
+def test_predict_proba_shape_and_empty():
+    clf = _toy_classifier()
+    probs = clf.predict_proba(["good", "bad", "ok"])
+    assert probs.shape == (3, 2)
+    assert clf.predict_proba([]).shape == (0, 2)
+
+
+def test_save_load_roundtrip(tmp_path):
+    set_seed(0)
+    clf = _toy_classifier()
+    texts = ["a great wonderful film", "an awful boring movie"]
+    before = clf.predict_proba(texts)
+    path = tmp_path / "model.pt"
+    clf.save(path)
+    reloaded = SentimentClassifier.load(path)
+    after = reloaded.predict_proba(texts)
+    assert np.allclose(before, after, atol=1e-5)
+    assert reloaded.labels == ("negative", "positive")
+
+
+def test_load_csv(tmp_path):
+    csv_path = tmp_path / "s.csv"
+    csv_path.write_text("text,label\ngreat film,1\nawful film,0\n", encoding="utf-8")
+    texts, labels = load_csv(csv_path)
+    assert texts == ["great film", "awful film"]
+    assert labels == [1, 0]
+
+
+def test_reliability_curve_perfect_and_ece():
+    # Perfectly calibrated: confidence 1.0 and always correct -> ECE 0.
+    probs = np.array([[0.0, 1.0], [1.0, 0.0], [0.0, 1.0]])
+    labels = np.array([1, 0, 1])
+    curve = reliability_curve(probs, labels, n_bins=5)
+    assert curve.ece == 0.0
+    assert curve.bin_count.sum() == 3
+    # Overconfident and wrong -> positive ECE.
+    bad = reliability_curve(np.array([[0.0, 1.0]]), np.array([0]), n_bins=5)
+    assert bad.ece > 0.5
 
 
 def test_trainer_learns_toy_sentiment():
