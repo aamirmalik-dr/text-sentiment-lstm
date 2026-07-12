@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentlstm"
+version = "0.1.0"
+description = "An LSTM sentiment classifier in PyTorch with optional pretrained GloVe embeddings"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Aamir Malik" }]
+keywords = ["pytorch", "lstm", "sentiment-analysis", "nlp", "text-classification"]
+dependencies = [
+    "torch>=2.0",
+    "numpy>=1.24",
+    "matplotlib>=3.7",
+    "datasets>=2.14",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ruff>=0.1", "black>=23.0"]
+
+[project.urls]
+Repository = "https://github.com/aamirmalik-dr/text-sentiment-lstm"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
