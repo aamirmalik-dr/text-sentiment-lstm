@@ -16,14 +16,24 @@ env/
 .coverage
 htmlcov/
 
-# Data and generated artifacts (fetched or produced locally, never committed)
+# Data: ignore full datasets and downloads, but commit the small carved sample
 data/*
 !data/README.md
-results/
+!data/sample_train.csv
+!data/sample_test.csv
+
+# Generated artifacts: ignore everything under results/, but commit the hero
+# figure and the metrics file so the repo shows results without a training run
+results/*
+!results/reliability.png
+!results/metrics.json
+
+# Model checkpoints: ignore all weights except the small committed pretrained model
 *.pt
 *.pth
 *.pth.tar
 *.ckpt
+!models/sentlstm_rt.pt
 
 # OS
 .DS_Store

@@ -1,0 +1,15 @@
+{
+  "dataset": "rotten_tomatoes_carved_sample",
+  "train_size": 1500,
+  "test_size": 500,
+  "vocab_size": 2544,
+  "epochs": 10,
+  "embed_dim": 64,
+  "hidden_dim": 64,
+  "seed": 0,
+  "test_accuracy": 0.618,
+  "expected_calibration_error": 0.2669,
+  "mean_confidence": 0.8764,
+  "model_file": "sentlstm_rt.pt",
+  "model_size_kb": 949.1
+}
