@@ -38,6 +38,7 @@ class Trainer:
 
     model: torch.nn.Module
     lr: float = 1e-3
+    weight_decay: float = 0.0
     device: str = "cpu"
     history: dict[str, list[float]] = field(
         default_factory=lambda: {"train_loss": [], "test_acc": []}
@@ -55,7 +56,7 @@ class Trainer:
         verbose: bool = True,
     ) -> Trainer:
         self.model.to(self.device)
-        opt = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        opt = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         loss_fn = torch.nn.CrossEntropyLoss()
         train_loader = self._loader(train_set, batch_size, shuffle=True)
         for epoch in range(epochs):

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -65,6 +67,24 @@ def collate_batch(
         torch.tensor(lengths, dtype=torch.long).clamp(min=1),
         torch.from_numpy(labels),
     )
+
+
+def load_csv(path: str | Path) -> tuple[list[str], list[int]]:
+    """Load a ``text,label`` CSV into parallel lists of texts and integer labels.
+
+    Args:
+        path: Path to a CSV file with a header row of ``text,label``.
+
+    Returns:
+        A ``(texts, labels)`` tuple.
+    """
+    texts: list[str] = []
+    labels: list[int] = []
+    with Path(path).open(encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            texts.append(row["text"])
+            labels.append(int(row["label"]))
+    return texts, labels
 
 
 def synthetic_sentiment(repeats: int = 20, seed: int = 0) -> tuple[list[str], list[int]]:

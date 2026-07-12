@@ -23,6 +23,14 @@ class Vocabulary:
         self.stoi: dict[str, int] = {PAD_TOKEN: 0, UNK_TOKEN: 1}
         self.itos: dict[int, str] = {0: PAD_TOKEN, 1: UNK_TOKEN}
 
+    @classmethod
+    def from_stoi(cls, stoi: dict[str, int]) -> Vocabulary:
+        """Rebuild a vocabulary from a saved token-to-id mapping."""
+        vocab = cls()
+        vocab.stoi = dict(stoi)
+        vocab.itos = {idx: tok for tok, idx in vocab.stoi.items()}
+        return vocab
+
     @property
     def pad_id(self) -> int:
         return 0
