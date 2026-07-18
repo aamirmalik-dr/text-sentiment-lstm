@@ -1,5 +1,7 @@
 # text-sentiment-lstm
 
+*Origin: Originally developed for the Machine Learning for Knowledge Service course at KAIST (Spring 2019); refactored and open-sourced in July 2026.*
+
 A small, typed PyTorch library for binary sentiment classification with a
 bidirectional LSTM. It ships a from-scratch word tokenizer, a trained model in a
 single file, and calibration tooling that tells you when the model's confidence
