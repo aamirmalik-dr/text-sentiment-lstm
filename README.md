@@ -147,7 +147,7 @@ sentence-polarity dataset, not synthetic. See [data/README.md](data/README.md).
 Aamir Malik
 
 - GitHub: https://github.com/aamirmalik-dr
-- LinkedIn: https://linkedin.com/in/dr-aamirmalik
+- LinkedIn: https://linkedin.com/in/aamirmalik-dr
 
 ## License
 
